@@ -51,7 +51,7 @@ public class RoseEquation implements PolarEquation {
 
   @Override
   public String getLabel() {
-    return "Rose = r cos (t * n/d)";
+    return "Rose: r = cos (t * n/d)";
   }
 
   @Override
