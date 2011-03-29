@@ -47,7 +47,11 @@ public class PolarEngine extends RenderEngine {
     super(canvas);
     initControlPanel();
     front = canvas.getContext2d();
-    back = canvas.getContext2d();
+    // This one is intentionally not attached to the DOM
+    Canvas backCanvas = Canvas.createIfSupported();
+    backCanvas.setCoordinateSpaceHeight(height);
+    backCanvas.setCoordinateSpaceWidth(width);
+    back = backCanvas.getContext2d();
     xc = width / 2;
     yc = height / 2;
   }
@@ -150,13 +154,10 @@ public class PolarEngine extends RenderEngine {
   @Override
   public void drawFrame(int deg) {
     double theta = deg * Math.PI / 180;
-    back.clearRect(0, 0, width, height);
-    // Restore the completed figure
-    if (savedImage != null)
-      back.putImageData(savedImage, 0, 0);
     double r = eq.calcR(theta);
     drawSegment(r, theta);
-    savedImage = back.getImageData(0, 0, width, height);
+    front.clearRect(0, 0, width, height);
+    front.drawImage(back.getCanvas(), 0, 0);
     drawSweep(maxradius, r, theta);
   }
 
@@ -210,11 +211,11 @@ public class PolarEngine extends RenderEngine {
     front.stroke();
   }
 
-  private int getY(double r, double theta) {
+  public static int getY(double r, double theta) {
     return (int) (r * Math.sin(theta));
   }
 
-  private int getX(double r, double theta) {
+  public static int getX(double r, double theta) {
     return (int) (r * Math.cos(theta));
   }
 }
