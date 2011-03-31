@@ -28,4 +28,14 @@ public abstract class RenderEngine {
   abstract void drawFrame(int deg);
 
   abstract void start();
+  
+  public static int gcf(int n, int d) {
+    if (n==d)
+      return n;
+    int max = Math.max(n, d);
+    for (int i = max / 2; i > 1; i--)
+      if ((n % i == 0) && (d % i == 0))
+        return i;
+    return 1;
+  }
 }

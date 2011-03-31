@@ -6,30 +6,31 @@ import java.util.List;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.ImageData;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 public class PolarEngine extends RenderEngine {
 
-  private double maxradius = 290.;
-  private int yc;
-  private int xc;
+  protected double maxradius = 290.;
+  protected int yc;
+  protected int xc;
   private Timer t;
-  private Context2d front;
-  private Context2d back;
-  private ImageData savedImage;
+  protected Context2d front;
+  protected Context2d back;
   private Label nTurns = new Label();
   private IntegerSlider nSlider = new IntegerSlider();
   private IntegerSlider dSlider = new IntegerSlider();
-  private VerticalPanel sidebar;
+  private VerticalPanel controlPanel;
   private PolarEquation eq;
   private double lastX;
   private double lastY;
@@ -43,9 +44,8 @@ public class PolarEngine extends RenderEngine {
     void init();
   }
 
-  public PolarEngine(Canvas canvas) {
+  public PolarEngine(Canvas canvas, final TabLayoutPanel panel) {
     super(canvas);
-    initControlPanel();
     front = canvas.getContext2d();
     // This one is intentionally not attached to the DOM
     Canvas backCanvas = Canvas.createIfSupported();
@@ -54,10 +54,21 @@ public class PolarEngine extends RenderEngine {
     back = backCanvas.getContext2d();
     xc = width / 2;
     yc = height / 2;
+    initControlPanel();
+    panel.addSelectionHandler(new SelectionHandler<Integer>() {
+      @Override
+      public void onSelection(SelectionEvent<Integer> event) {
+        int i = event.getSelectedItem();
+        if (panel.getWidget(i)==getControlPanel())
+            refresh();
+        else if (t!=null)
+          t.cancel();
+      }
+    });
   }
 
-  private void initControlPanel() {
-    sidebar = new VerticalPanel();
+  protected void initControlPanel() {
+    controlPanel = new VerticalPanel();
     addEquationChooser();
     addSliders();
     addCounter();
@@ -66,9 +77,9 @@ public class PolarEngine extends RenderEngine {
   private void addCounter() {
     Label halfTurns = new Label("# half turns");
     halfTurns.addStyleName("centered");
-    sidebar.add(halfTurns);
+    controlPanel.add(halfTurns);
     nTurns.addStyleName("counter");
-    sidebar.add(nTurns);
+    controlPanel.add(nTurns);
   }
 
   private void addSliders() {
@@ -77,11 +88,11 @@ public class PolarEngine extends RenderEngine {
     nSlider.addValueChangeHandler(refreshVCH);
     dSlider.addValueChangeHandler(refreshVCH);
 
-    sidebar.add(eqChooser);
-    sidebar.add(new Label("Numerator"));
-    sidebar.add(nSlider);
-    sidebar.add(new Label("Denominator"));
-    sidebar.add(dSlider);
+    controlPanel.add(eqChooser);
+    controlPanel.add(new Label("Numerator"));
+    controlPanel.add(nSlider);
+    controlPanel.add(new Label("Denominator"));
+    controlPanel.add(dSlider);
   }
 
   private void addEquationChooser() {
@@ -112,17 +123,18 @@ public class PolarEngine extends RenderEngine {
 
   @Override
   public Widget getControlPanel() {
-    return sidebar;
+    return controlPanel;
   }
 
   @Override
   public void refresh() {
+    if (t!=null)
+      t.cancel();
     this.eq = eqChooser.getValue();
     if (eq==null)
       return;
     eq.init();
     back.clearRect(0, 0, width, height);
-    savedImage = null;
 
     start();
   }
@@ -188,6 +200,12 @@ public class PolarEngine extends RenderEngine {
     int sy = yc - getY(s, theta);
     int bx = xc - getX(s, theta);
     int by = yc + getY(s, theta);
+    // Draw center
+    front.beginPath();
+    front.setStrokeStyle("black");
+    front.arc(xc, yc, 4, 0, Math.PI * 2);
+    front.closePath();
+    front.stroke();
     // Draw bubble
     front.beginPath();
     front.setFillStyle(back.getFillStyle());
