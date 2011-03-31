@@ -101,6 +101,7 @@ public class Spirograph extends PolarEngine {
     cp.add(new Label("Pen thickness"));
     penWidthSlider = new IntegerSlider();
     penWidthSlider.setNumLabels(0);
+    penWidthSlider.setValue(3.);
     penWidthSlider.addValueChangeHandler(refreshVCH);
     cp.add(penWidthSlider);
     addButtons();
@@ -217,6 +218,7 @@ public class Spirograph extends PolarEngine {
     return ru / g;
   }
 
+  @Override
   protected void stop() {
     started = false;
     if (t!=null) {
@@ -234,6 +236,7 @@ public class Spirograph extends PolarEngine {
 
   private void drawFixed() {
     front.beginPath();
+    front.setLineWidth(2);
     front.setStrokeStyle("gray");
     front.arc(xc, yc, R, 0, PI2);
     front.closePath();
@@ -250,16 +253,17 @@ public class Spirograph extends PolarEngine {
     double wx = xc + ((R + r) * Math.cos(theta));
     double wy = yc - ((R + r) * Math.sin(theta));
     if (rUnits>0) {
+      // Draw ring
+      front.beginPath();
+      front.arc(wx, wy, Math.abs(r), 0, PI2);
+      front.closePath();
+      front.stroke();
       // Draw center
+      front.setLineWidth(1);
       front.beginPath();
       front.arc(wx, wy, 3, 0, PI2);
       front.setFillStyle("black");
       front.fill();
-      front.closePath();
-      front.stroke();
-      // Draw ring
-      front.beginPath();
-      front.arc(wx, wy, Math.abs(r), 0, PI2);
       front.closePath();
       front.stroke();
     }
@@ -285,6 +289,7 @@ public class Spirograph extends PolarEngine {
     front.arc(tx, ty, penWidth/2+2, 0, PI2);
     front.fill();
     front.moveTo(wx, wy);
+    front.setStrokeStyle("black");
     front.lineTo(tx, ty);
     front.closePath();
     front.stroke();
