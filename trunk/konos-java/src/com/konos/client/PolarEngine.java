@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -39,8 +41,11 @@ public class PolarEngine extends RenderEngine {
 
   public interface PolarEquation {
     int numHalfTurns();
+
     double calcR(double theta);
+
     String getLabel();
+
     void init();
   }
 
@@ -59,10 +64,18 @@ public class PolarEngine extends RenderEngine {
       @Override
       public void onSelection(SelectionEvent<Integer> event) {
         int i = event.getSelectedItem();
-        if (panel.getWidget(i)==getControlPanel())
-            refresh();
-        else if (t!=null)
-          t.cancel();
+        Scheduler.get().scheduleDeferred(new ScheduledCommand() {
+          @Override
+          public void execute() {
+            nSlider.onResize();
+            dSlider.onResize();
+          }
+        });
+        if (panel.getWidget(i)==getControlPanel()) {
+          refresh();
+        } else {
+          stop();
+        }
       }
     });
   }
@@ -103,15 +116,15 @@ public class PolarEngine extends RenderEngine {
           return eq.getLabel();
         return "Select an equation";
       }
-      
+
       @Override
       public void render(PolarEquation eq, Appendable appendable) throws IOException {
         appendable.append(eq.getLabel());
       }
     });
     options.add(new RoseEquation(maxradius, nSlider, dSlider));
-//    options.add(new Sinusoid(maxradius, nSlider, dSlider));
-//    options.add(new Lemniscate(maxradius));
+    // options.add(new Sinusoid(maxradius, nSlider, dSlider));
+    // options.add(new Lemniscate(maxradius));
     eqChooser.setAcceptableValues(options);
     eqChooser.addValueChangeHandler(new ValueChangeHandler<PolarEquation>() {
       @Override
@@ -126,16 +139,20 @@ public class PolarEngine extends RenderEngine {
     return controlPanel;
   }
 
+  protected void stop() {
+    if (t!=null) {
+      t.cancel();
+    }
+  }
+
   @Override
   public void refresh() {
-    if (t!=null)
-      t.cancel();
+    stop();
     this.eq = eqChooser.getValue();
-    if (eq==null)
+    if (eq == null)
       return;
     eq.init();
     back.clearRect(0, 0, width, height);
-
     start();
   }
 
@@ -156,8 +173,11 @@ public class PolarEngine extends RenderEngine {
           drawFrame(deg++);
           turns = new Integer(deg / 180);
           nTurns.setText(turns + "/" + nPi);
-        } else
+        } else {
           this.cancel();
+          front.clearRect(0, 0, width, height);
+          front.drawImage(back.getCanvas(), 0, 0);
+        }
       }
     };
     t.scheduleRepeating(1);

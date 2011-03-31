@@ -34,12 +34,6 @@ public class PolarTek implements EntryPoint {
     Spirograph spirograph = new Spirograph(canvas, tabLayoutPanel);
     tabLayoutPanel.add(spirograph.getControlPanel(), "Spirograph!");
     tabLayoutPanel.add(polarEngine.getControlPanel(), "Polar");
-    tabLayoutPanel.addSelectionHandler(new SelectionHandler<Integer>() {
-      @Override
-      public void onSelection(SelectionEvent<Integer> event) {
-        event.getSelectedItem();
-      }
-    });
     dp.addWest(tabLayoutPanel, 25);
     dp.add(canvas);
     RootLayoutPanel.get().add(dp);
