@@ -31,24 +31,14 @@ public class RoseEquation implements PolarEquation {
   public int numHalfTurns() {
     // Calc # of turns required
     // int nPi = (n%d>0)? d*(1+(n+d)%2) : 2-(n/d)%2;
-    int f = gcf(n, d);
-    if (f > 0) {
+    int f = RenderEngine.gcf(n, d);
+    if (f > 1) {
       n /= f;
       d /= f;
     }
     return (d > 1) ? d * (1 + (n + d) % 2) : 2 - n % 2;
   }
   
-  private int gcf(int n2, int d2) {
-    if (n==d)
-      return n;
-    int max = Math.max(n2, d2);
-    for (int i = max / 2; i > 1; i--)
-      if ((n2 % i == 0) && (d2 % i == 0))
-        return i;
-    return 0;
-  }
-
   @Override
   public String getLabel() {
     return "Rose: r = cos (t * n/d)";
