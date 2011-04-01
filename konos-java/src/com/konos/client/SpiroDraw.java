@@ -25,7 +25,7 @@ import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class Spirograph extends PolarEngine {
+public class SpiroDraw extends PolarEngine {
 
   private static final double PI2 = Math.PI * 2;
   // Scale factor used to scale wheel radius from 1-10 to pixels
@@ -58,7 +58,7 @@ public class Spirograph extends PolarEngine {
     }
   }
   
-  public Spirograph(final Canvas canvas, TabLayoutPanel panel) {
+  public SpiroDraw(final Canvas canvas, TabLayoutPanel panel) {
     super(canvas, panel);
     // Compute fixed radius
     int min = Math.min(height, width);
@@ -83,7 +83,7 @@ public class Spirograph extends PolarEngine {
     });
     inOrOut.setAcceptableValues(Arrays.asList(WheelLocation.values()));
     inOrOut.setValue(WheelLocation.INSIDE);
-    inOrOut.addValueChangeHandler(new ValueChangeHandler<Spirograph.WheelLocation>() {
+    inOrOut.addValueChangeHandler(new ValueChangeHandler<SpiroDraw.WheelLocation>() {
       @Override
       public void onValueChange(ValueChangeEvent<WheelLocation> event) {
         refresh();

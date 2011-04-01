@@ -22,16 +22,11 @@ public class PolarTek implements EntryPoint {
   public void onModuleLoad() {
 
     canvas = Canvas.createIfSupported();
-//    canvas.setPixelSize(width, height);
     DockLayoutPanel dp = new DockLayoutPanel(Unit.PX);
-//    canvas.setCoordinateSpaceHeight(height);
-//    canvas.setCoordinateSpaceWidth(width);
-
-    
     TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(10, Unit.PCT);
     RenderEngine polarEngine = new PolarEngine(canvas, tabLayoutPanel);
-    Spirograph spirograph = new Spirograph(canvas, tabLayoutPanel);
-    tabLayoutPanel.add(spirograph.getControlPanel(), "Spirograph!");
+    SpiroDraw spirograph = new SpiroDraw(canvas, tabLayoutPanel);
+    tabLayoutPanel.add(spirograph.getControlPanel(), "SpiroDraw!");
     tabLayoutPanel.add(polarEngine.getControlPanel(), "Polar");
     dp.addWest(tabLayoutPanel, 200);
     dp.add(canvas);
