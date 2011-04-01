@@ -16,6 +16,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -44,7 +45,7 @@ public class Spirograph extends PolarEngine {
   private CssColor penColor = CssColor.make("red");
   private IntegerSlider penWidthSlider;
   private int penWidth;
-  private int deg;
+  private int deg = 0;
   
   private enum WheelLocation {
     INSIDE(-1), OUTSIDE(1);
@@ -120,10 +121,11 @@ public class Spirograph extends PolarEngine {
   private void addColorPicker() {
     cp.add(new Label("Pen color"));
     colorPicker = new GWTColorPicker();
-    colorPicker.addSelectionHandler(new SelectionHandler<CssColor>() {
+    colorPicker.addSelectionHandler(new SelectionHandler<String>() {
       @Override
-      public void onSelection(SelectionEvent<CssColor> event) {
-        penColor = event.getSelectedItem();
+      public void onSelection(SelectionEvent<String> event) {
+        String colorString = event.getSelectedItem();
+        penColor = CssColor.make(colorString);
         drawFrame(deg);
       }
     });

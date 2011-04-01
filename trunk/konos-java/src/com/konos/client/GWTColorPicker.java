@@ -11,10 +11,9 @@ import com.google.gwt.event.logical.shared.HasSelectionHandlers;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.shared.HandlerRegistration;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Composite;
 
-public class GWTColorPicker extends Composite implements MouseMoveHandler, MouseDownHandler, HasSelectionHandlers<CssColor> {
+public class GWTColorPicker extends Composite implements MouseMoveHandler, MouseDownHandler, HasSelectionHandlers<String> {
 
   private static final int COLS = 18;
   // Block height, width, padding
@@ -50,7 +49,7 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
     if ((y<0) || (x>=width))
       return;
     ctx.setFillStyle(getColor(x, y));
-    ctx.fillRect(0, 0, 90, 30);
+    ctx.fillRect(0, 0, width/2, 30);
   }
 
   @Override
@@ -65,7 +64,7 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
   }
 
   @Override
-  public HandlerRegistration addSelectionHandler(SelectionHandler<CssColor> handler) {
+  public HandlerRegistration addSelectionHandler(SelectionHandler<String> handler) {
     return super.addHandler(handler, SelectionEvent.getType());
   }
 
@@ -91,7 +90,7 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
   }
 
   private void fireSelected(CssColor color) {
-      SelectionEvent.fire(this, color);
+      SelectionEvent.fire(this, color.value());
   }
 
   private CssColor getColor(int x, int y) {
