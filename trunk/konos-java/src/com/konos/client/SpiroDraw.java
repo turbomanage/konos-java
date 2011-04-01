@@ -195,6 +195,7 @@ public class SpiroDraw extends PolarEngine {
     buttonBar.add(startButton);
     buttonBar.add(stopButton);
     buttonBar.add(clearButton);
+    buttonBar.setWidth("100%");
     cp.add(buttonBar);
   }
 
@@ -239,15 +240,12 @@ public class SpiroDraw extends PolarEngine {
   /**
    * Compute good step size based on actual pixel radii
    * 
-   * @return int Optimum step size 1-6
+   * @return int Optimum step size in radians
    */
   private double calcStepSize() {
-    // Approximate max step size based on total distance
     return 5 / (R + r + d);
-//    return (int) Math.min(approxScaleFactor, 6); 
   }
 
-  @Override
   public void drawFrame(double theta) {
     front.clearRect(0, 0, width, height);
     front.drawImage(back.getCanvas(), 0, 0);
