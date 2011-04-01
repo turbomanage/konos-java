@@ -8,6 +8,8 @@ import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -15,13 +17,15 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Label;
+import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class PolarEngine extends RenderEngine {
+public class PolarEngine extends RenderEngine implements RequiresResize {
 
   protected double maxradius = 290.;
   protected int yc;
@@ -38,6 +42,7 @@ public class PolarEngine extends RenderEngine {
   private double lastY;
   private ValueListBox<PolarEquation> eqChooser;
   private List<PolarEquation> options = new ArrayList<PolarEquation>();
+  protected Canvas backCanvas;
 
   public interface PolarEquation {
     int numHalfTurns();
@@ -52,18 +57,14 @@ public class PolarEngine extends RenderEngine {
   public PolarEngine(Canvas canvas, final TabLayoutPanel panel) {
     super(canvas);
     front = canvas.getContext2d();
-    // This one is intentionally not attached to the DOM
-    Canvas backCanvas = Canvas.createIfSupported();
-    backCanvas.setCoordinateSpaceHeight(height);
-    backCanvas.setCoordinateSpaceWidth(width);
+    backCanvas = Canvas.createIfSupported();
     back = backCanvas.getContext2d();
-    xc = width / 2;
-    yc = height / 2;
     initControlPanel();
     panel.addSelectionHandler(new SelectionHandler<Integer>() {
       @Override
       public void onSelection(SelectionEvent<Integer> event) {
         int i = event.getSelectedItem();
+        // TODO handle resize properly
         Scheduler.get().scheduleDeferred(new ScheduledCommand() {
           @Override
           public void execute() {
@@ -78,6 +79,14 @@ public class PolarEngine extends RenderEngine {
         }
       }
     });
+    Window.addResizeHandler(new ResizeHandler() {
+      @Override
+      public void onResize(ResizeEvent event) {
+        PolarEngine.this.onResize();
+        refresh();
+      }
+    });
+    onResize();
   }
 
   protected void initControlPanel() {
@@ -256,4 +265,17 @@ public class PolarEngine extends RenderEngine {
   public static int getX(double r, double theta) {
     return (int) (r * Math.cos(theta));
   }
+  
+  @Override
+  public void onResize() {
+    height = Window.getClientHeight();
+    width = Window.getClientWidth() - 200;
+    yc = height/2;
+    xc = width/2;
+    canvas.setCoordinateSpaceHeight(height);
+    canvas.setCoordinateSpaceWidth(width);
+    backCanvas.setCoordinateSpaceHeight(height);
+    backCanvas.setCoordinateSpaceWidth(width);
+  }
+
 }

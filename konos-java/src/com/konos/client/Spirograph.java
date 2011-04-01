@@ -9,6 +9,8 @@ import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
@@ -54,7 +56,7 @@ public class Spirograph extends PolarEngine {
     }
   }
   
-  public Spirograph(Canvas canvas, TabLayoutPanel panel) {
+  public Spirograph(final Canvas canvas, TabLayoutPanel panel) {
     super(canvas, panel);
     // Compute fixed radius
     int min = Math.min(height, width);
@@ -111,6 +113,13 @@ public class Spirograph extends PolarEngine {
   private void addColorPicker() {
     cp.add(new Label("Pen color"));
     colorPicker = new GWTColorPicker();
+    colorPicker.addSelectionHandler(new SelectionHandler<CssColor>() {
+      @Override
+      public void onSelection(SelectionEvent<CssColor> event) {
+        penColor = event.getSelectedItem();
+        refresh();
+      }
+    });
     cp.add(colorPicker);
   }
 
@@ -164,7 +173,6 @@ public class Spirograph extends PolarEngine {
     lastX = 0;
     lastY = 0;
     penWidth = penWidthSlider.getValue().intValue();
-    penColor  = colorPicker.getSelectedColor();
     back.setStrokeStyle(penColor);
     // Scale inner radius and pen distance in units of fixed radius
     rUnits = innerRadiusSlider.getValue().intValue();
@@ -276,7 +284,7 @@ public class Spirograph extends PolarEngine {
    * 
    * @param wx X coordinate of wheel center
    * @param wy Y coordinate of wheel center
-   * @param theta Angle of wheel pos with respect to fixed circle
+   * @param theta Angle of wheel center with respect to fixed circle
    */
   private void drawTip(double wx, double wy, double theta) {
     // Calc wheel rotation angle

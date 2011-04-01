@@ -15,18 +15,17 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 public class PolarTek implements EntryPoint {
 
   private Canvas canvas;
-  protected int height = 600;
-  protected int width = 600;
+  protected int height;
+  protected int width;
   
   
   public void onModuleLoad() {
 
     canvas = Canvas.createIfSupported();
-    canvas.setPixelSize(width, height);
-    DockLayoutPanel dp = new DockLayoutPanel(Unit.PCT);
-    dp.setPixelSize(800, 800);
-    canvas.setCoordinateSpaceHeight(height);
-    canvas.setCoordinateSpaceWidth(width);
+//    canvas.setPixelSize(width, height);
+    DockLayoutPanel dp = new DockLayoutPanel(Unit.PX);
+//    canvas.setCoordinateSpaceHeight(height);
+//    canvas.setCoordinateSpaceWidth(width);
 
     
     TabLayoutPanel tabLayoutPanel = new TabLayoutPanel(10, Unit.PCT);
@@ -34,7 +33,7 @@ public class PolarTek implements EntryPoint {
     Spirograph spirograph = new Spirograph(canvas, tabLayoutPanel);
     tabLayoutPanel.add(spirograph.getControlPanel(), "Spirograph!");
     tabLayoutPanel.add(polarEngine.getControlPanel(), "Polar");
-    dp.addWest(tabLayoutPanel, 25);
+    dp.addWest(tabLayoutPanel, 200);
     dp.add(canvas);
     RootLayoutPanel.get().add(dp);
 
