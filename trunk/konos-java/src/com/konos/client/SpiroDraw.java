@@ -134,7 +134,7 @@ public class SpiroDraw extends PolarEngine {
       public String render(WheelLocation loc) {
         if (loc!=null)
           return loc.name();
-        return "Choose circle location";
+        return "Choose wheel location";
       }
       @Override
       public void render(WheelLocation loc, Appendable appendable) throws IOException {
