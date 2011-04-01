@@ -27,7 +27,7 @@ public class PolarTek implements EntryPoint {
     RenderEngine polarEngine = new PolarEngine(canvas, tabLayoutPanel);
     SpiroDraw spirograph = new SpiroDraw(canvas, tabLayoutPanel);
     tabLayoutPanel.add(spirograph.getControlPanel(), "SpiroDraw!");
-    tabLayoutPanel.add(polarEngine.getControlPanel(), "Polar");
+    tabLayoutPanel.add(polarEngine.getControlPanel(), "PolarTek");
     dp.addWest(tabLayoutPanel, 200);
     dp.add(canvas);
     RootLayoutPanel.get().add(dp);

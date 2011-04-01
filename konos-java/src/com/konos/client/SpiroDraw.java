@@ -16,7 +16,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -30,10 +29,10 @@ public class SpiroDraw extends PolarEngine {
   private static final double PI2 = Math.PI * 2;
   // Scale factor used to scale wheel radius from 1-10 to pixels
   private VerticalPanel cp;
-  private static final int RUnits = 10;
-  private int rUnits, dUnits;
+  private int RUnits, rUnits, dUnits;
   private double R, r, d; 
-  private IntegerSlider innerRadiusSlider;
+  private IntegerSlider fixedRadiusSlider;
+  private IntegerSlider wheelRadiusSlider;
   private IntegerSlider penRadiusSlider;
   private ValueListBox<WheelLocation> inOrOut;
   private double lastX, lastY;
@@ -60,15 +59,76 @@ public class SpiroDraw extends PolarEngine {
   
   public SpiroDraw(final Canvas canvas, TabLayoutPanel panel) {
     super(canvas, panel);
-    // Compute fixed radius
-    int min = Math.min(height, width);
-    R = min / 4;
   }
 
   @Override
   protected void initControlPanel() {
     cp = new VerticalPanel();
+    addWheelLocationChooser();
+    addFixedRadiusSlider();
+    addWheelRadiusSlider();
+    addPenRadiusSlider();
+    addColorPicker();
+    addPenWidthSlider();
+    addButtons();
+    addCounter();
+  }
 
+  private void addFixedRadiusSlider() {
+    cp.add(new Label("Fixed radius"));
+    fixedRadiusSlider = new IntegerSlider(10, 19);
+    fixedRadiusSlider.setValue(10.);
+    fixedRadiusSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Double> event) {
+        refresh();
+      }
+    });
+    cp.add(fixedRadiusSlider);
+  }
+
+  private void addPenWidthSlider() {
+    cp.add(new Label("Pen thickness"));
+    penWidthSlider = new IntegerSlider();
+    penWidthSlider.setNumLabels(0);
+    penWidthSlider.setValue(3.);
+    penWidthSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Double> event) {
+        penWidth = event.getValue().intValue();
+        drawFrame(deg);
+      }
+    });
+    cp.add(penWidthSlider);
+  }
+
+  private void addPenRadiusSlider() {
+    cp.add(new Label("Pen radius"));
+    penRadiusSlider = new IntegerSlider(0, 9);
+    penRadiusSlider.setValue(2.);
+    penRadiusSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Double> event) {
+        refresh();
+      }
+    });
+    cp.add(penRadiusSlider);
+  }
+
+  private void addWheelRadiusSlider() {
+    cp.add(new Label("Wheel radius"));
+    wheelRadiusSlider = new IntegerSlider(0, 9);
+    wheelRadiusSlider.setValue(3.);
+    wheelRadiusSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Double> event) {
+        refresh();
+      }
+    });
+    cp.add(wheelRadiusSlider);
+  }
+
+  private void addWheelLocationChooser() {
     inOrOut = new ValueListBox<WheelLocation>(new Renderer<WheelLocation>() {
       @Override
       public String render(WheelLocation loc) {
@@ -91,31 +151,6 @@ public class SpiroDraw extends PolarEngine {
     });
     
     cp.add(inOrOut);
-    cp.add(new Label("Circle radius"));
-    innerRadiusSlider = new IntegerSlider(0, 9);
-    innerRadiusSlider.setValue(3.);
-    innerRadiusSlider.addValueChangeHandler(refreshVCH);
-    cp.add(innerRadiusSlider);
-    cp.add(new Label("Pen radius"));
-    penRadiusSlider = new IntegerSlider(0, 9);
-    penRadiusSlider.setValue(2.);
-    penRadiusSlider.addValueChangeHandler(refreshVCH);
-    cp.add(penRadiusSlider);
-    addColorPicker();
-    cp.add(new Label("Pen thickness"));
-    penWidthSlider = new IntegerSlider();
-    penWidthSlider.setNumLabels(0);
-    penWidthSlider.setValue(3.);
-    penWidthSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
-      @Override
-      public void onValueChange(ValueChangeEvent<Double> event) {
-        penWidth = event.getValue().intValue();
-        drawFrame(deg);
-      }
-    });
-    cp.add(penWidthSlider);
-    addButtons();
-    addCounter();
   }
 
   private void addColorPicker() {
@@ -181,14 +216,20 @@ public class SpiroDraw extends PolarEngine {
     // Reset
     lastX = 0;
     lastY = 0;
-    penWidth = penWidthSlider.getValue().intValue();
+    // Compute fixed radius
+    // based on starting diameter == min / 2, fixed radius == 10 units
+    int min = Math.min(height, width);
+    double pixelsPerUnit = min / 40.;
+    RUnits = fixedRadiusSlider.getValue().intValue();
+    R = RUnits * pixelsPerUnit;
     // Scale inner radius and pen distance in units of fixed radius
-    rUnits = innerRadiusSlider.getValue().intValue();
+    rUnits = wheelRadiusSlider.getValue().intValue();
     r = rUnits * R/RUnits * inOrOut.getValue().getSense();
     dUnits = penRadiusSlider.getValue().intValue();
     d = dUnits * R/RUnits;
     maxTurns = calcTurns();
     numTurns.setText("0" + "/" + maxTurns);
+    penWidth = penWidthSlider.getValue().intValue();
     drawFrame(0);
   }
 
