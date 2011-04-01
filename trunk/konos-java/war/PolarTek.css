@@ -43,3 +43,6 @@ h1 {
 .centered {
 	text-align: center;
 }
+palette {
+	cursor: pointer;
+}
