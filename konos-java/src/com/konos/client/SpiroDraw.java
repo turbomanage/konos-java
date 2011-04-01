@@ -16,6 +16,7 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -44,7 +45,8 @@ public class SpiroDraw extends PolarEngine {
   private CssColor penColor = CssColor.make("red");
   private IntegerSlider penWidthSlider;
   private int penWidth;
-  private int deg = 0;
+  private double rad = 0;
+  private double stepSize;
   
   private enum WheelLocation {
     INSIDE(-1), OUTSIDE(1);
@@ -96,7 +98,7 @@ public class SpiroDraw extends PolarEngine {
       @Override
       public void onValueChange(ValueChangeEvent<Double> event) {
         penWidth = event.getValue().intValue();
-        drawFrame(deg);
+        drawFrame(rad);
       }
     });
     cp.add(penWidthSlider);
@@ -161,7 +163,7 @@ public class SpiroDraw extends PolarEngine {
       public void onSelection(SelectionEvent<String> event) {
         String colorString = event.getSelectedItem();
         penColor = CssColor.make(colorString);
-        drawFrame(deg);
+        drawFrame(rad);
       }
     });
     cp.add(colorPicker);
@@ -228,16 +230,27 @@ public class SpiroDraw extends PolarEngine {
     dUnits = penRadiusSlider.getValue().intValue();
     d = dUnits * R/RUnits;
     maxTurns = calcTurns();
+    stepSize = calcStepSize();
     numTurns.setText("0" + "/" + maxTurns);
     penWidth = penWidthSlider.getValue().intValue();
-    drawFrame(0);
+    drawFrame(0.);
+  }
+
+  /**
+   * Compute good step size based on actual pixel radii
+   * 
+   * @return int Optimum step size 1-6
+   */
+  private double calcStepSize() {
+    // Approximate max step size based on total distance
+    return 5 / (R + r + d);
+//    return (int) Math.min(approxScaleFactor, 6); 
   }
 
   @Override
-  public void drawFrame(int deg) {
+  public void drawFrame(double theta) {
     front.clearRect(0, 0, width, height);
     front.drawImage(back.getCanvas(), 0, 0);
-    double theta = deg * Math.PI / 180;
     drawFixed();
     drawWheel(theta);
   }
@@ -245,17 +258,17 @@ public class SpiroDraw extends PolarEngine {
   @Override
   public void start() {
     refresh();
-    deg = 0;
+    rad = 0;
 
     t = new Timer() {
 
       @Override
       public void run() {
-        if (deg <= maxTurns * 360) {
-          drawFrame(deg+=1);
-          if (deg % 360 == 0) {
-            numTurns.setText(deg/360 + "/" + maxTurns);
-          }
+        if (rad <= maxTurns * PI2) {
+          rad+=stepSize;
+          drawFrame(rad);
+          int nTurns = (int) Math.floor(rad / PI2);
+          numTurns.setText(nTurns + "/" + maxTurns);
         } else {
           stop();
         }
@@ -285,7 +298,7 @@ public class SpiroDraw extends PolarEngine {
     front.clearRect(0, 0, width, height);
     front.drawImage(back.getCanvas(), 0, 0);
     // Reset angle
-    deg = 0;
+    rad = 0;
   }
 
   protected void clear() {
@@ -352,13 +365,11 @@ public class SpiroDraw extends PolarEngine {
     front.lineTo(tx, ty);
     front.closePath();
     front.stroke();
-    if (started)
-      drawSegmentTo(tx, ty);
+    drawSegmentTo(tx, ty);
   }
 
   private void drawSegmentTo(double tx, double ty) {
-    if (lastX > 0)
-    {
+    if (lastX > 0) {
       back.beginPath();
       back.setStrokeStyle(penColor);
       back.setLineWidth(penWidth);

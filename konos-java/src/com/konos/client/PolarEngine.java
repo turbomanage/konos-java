@@ -192,6 +192,10 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
     t.scheduleRepeating(1);
   }
 
+  public void drawFrame(double theta) {
+    
+  }
+  
   @Override
   public void drawFrame(int deg) {
     double theta = deg * Math.PI / 180;
