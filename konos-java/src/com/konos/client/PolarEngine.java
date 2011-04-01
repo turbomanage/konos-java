@@ -132,8 +132,8 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
       }
     });
     options.add(new RoseEquation(maxradius, nSlider, dSlider));
-    // options.add(new Sinusoid(maxradius, nSlider, dSlider));
-    // options.add(new Lemniscate(maxradius));
+     options.add(new Sinusoid(maxradius, nSlider, dSlider));
+//     options.add(new Lemniscate(maxradius));
     eqChooser.setAcceptableValues(options);
     eqChooser.addValueChangeHandler(new ValueChangeHandler<PolarEquation>() {
       @Override
@@ -192,10 +192,6 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
     t.scheduleRepeating(1);
   }
 
-  public void drawFrame(double theta) {
-    
-  }
-  
   @Override
   public void drawFrame(int deg) {
     double theta = deg * Math.PI / 180;
