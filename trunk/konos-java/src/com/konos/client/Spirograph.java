@@ -44,6 +44,7 @@ public class Spirograph extends PolarEngine {
   private CssColor penColor = CssColor.make("red");
   private IntegerSlider penWidthSlider;
   private int penWidth;
+  private int deg;
   
   private enum WheelLocation {
     INSIDE(-1), OUTSIDE(1);
@@ -104,7 +105,13 @@ public class Spirograph extends PolarEngine {
     penWidthSlider = new IntegerSlider();
     penWidthSlider.setNumLabels(0);
     penWidthSlider.setValue(3.);
-    penWidthSlider.addValueChangeHandler(refreshVCH);
+    penWidthSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Double> event) {
+        penWidth = event.getValue().intValue();
+        drawFrame(deg);
+      }
+    });
     cp.add(penWidthSlider);
     addButtons();
     addCounter();
@@ -117,7 +124,7 @@ public class Spirograph extends PolarEngine {
       @Override
       public void onSelection(SelectionEvent<CssColor> event) {
         penColor = event.getSelectedItem();
-        refresh();
+        drawFrame(deg);
       }
     });
     cp.add(colorPicker);
@@ -173,7 +180,6 @@ public class Spirograph extends PolarEngine {
     lastX = 0;
     lastY = 0;
     penWidth = penWidthSlider.getValue().intValue();
-    back.setStrokeStyle(penColor);
     // Scale inner radius and pen distance in units of fixed radius
     rUnits = innerRadiusSlider.getValue().intValue();
     r = rUnits * R/RUnits * inOrOut.getValue().getSense();
@@ -196,9 +202,9 @@ public class Spirograph extends PolarEngine {
   @Override
   public void start() {
     refresh();
+    deg = 0;
 
     t = new Timer() {
-      int deg = 0;
 
       @Override
       public void run() {
@@ -235,6 +241,8 @@ public class Spirograph extends PolarEngine {
     // Show drawing only
     front.clearRect(0, 0, width, height);
     front.drawImage(back.getCanvas(), 0, 0);
+    // Reset angle
+    deg = 0;
   }
 
   protected void clear() {
@@ -309,6 +317,7 @@ public class Spirograph extends PolarEngine {
     if (lastX > 0)
     {
       back.beginPath();
+      back.setStrokeStyle(penColor);
       back.setLineWidth(penWidth);
       back.setLineCap(LineCap.SQUARE);
       back.setLineJoin(LineJoin.MITER);
