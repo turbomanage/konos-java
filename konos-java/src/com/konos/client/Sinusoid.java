@@ -10,18 +10,18 @@ public class Sinusoid extends RoseEquation {
 
   @Override
   public double calcR(double theta) {
-    double rPrime = Math.pow(maxR, n) * Math.cos(theta * n / d);
-    return Math.pow(rPrime, 1. / n);
-  }
-
-  @Override
-  public int numHalfTurns() {
-    return 2;
+    double rPrime = Math.pow(maxR, n) * Math.cos(theta * n/d);
+    return Math.pow(rPrime, 1./n);
   }
 
   @Override
   public String getLabel() {
     return "Sinusoid";
+  }
+
+  @Override
+  public int numHalfTurns() {
+    return 2;
   }
 
 }

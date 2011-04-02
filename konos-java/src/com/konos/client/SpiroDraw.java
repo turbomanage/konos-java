@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.canvas.dom.client.Context2d.LineCap;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
@@ -16,7 +16,6 @@ import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Timer;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -28,6 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class SpiroDraw extends PolarEngine {
 
   private static final double PI2 = Math.PI * 2;
+  private static final double SPEED = 5;
   // Scale factor used to scale wheel radius from 1-10 to pixels
   private VerticalPanel cp;
   private int RUnits, rUnits, dUnits;
@@ -37,7 +37,6 @@ public class SpiroDraw extends PolarEngine {
   private IntegerSlider penRadiusSlider;
   private ValueListBox<WheelLocation> inOrOut;
   private double lastX, lastY;
-  private boolean started;
   private Timer t;
   private Label numTurns;
   protected int maxTurns;
@@ -47,6 +46,7 @@ public class SpiroDraw extends PolarEngine {
   private int penWidth;
   private double rad = 0;
   private double stepSize;
+  private boolean animationEnabled = true;
   
   private enum WheelLocation {
     INSIDE(-1), OUTSIDE(1);
@@ -243,13 +243,15 @@ public class SpiroDraw extends PolarEngine {
    * @return int Optimum step size in radians
    */
   private double calcStepSize() {
-    return 5 / (R + r + d);
+    return SPEED / (R + r + d);
   }
 
   public void drawFrame(double theta) {
-    front.clearRect(0, 0, width, height);
-    front.drawImage(back.getCanvas(), 0, 0);
-    drawFixed();
+    if (animationEnabled) {
+      front.clearRect(0, 0, width, height);
+      front.drawImage(back.getCanvas(), 0, 0);
+      drawFixed();
+    }
     drawWheel(theta);
   }
 
@@ -257,9 +259,7 @@ public class SpiroDraw extends PolarEngine {
   public void start() {
     refresh();
     rad = 0;
-
     t = new Timer() {
-
       @Override
       public void run() {
         if (rad <= maxTurns * PI2) {
@@ -272,7 +272,6 @@ public class SpiroDraw extends PolarEngine {
         }
       }
     };
-    started = true;
     t.scheduleRepeating(1);
   }
 
@@ -288,7 +287,6 @@ public class SpiroDraw extends PolarEngine {
 
   @Override
   protected void stop() {
-    started = false;
     if (t!=null) {
       t.cancel();
     }
@@ -305,12 +303,14 @@ public class SpiroDraw extends PolarEngine {
   }
 
   private void drawFixed() {
-    front.beginPath();
-    front.setLineWidth(2);
-    front.setStrokeStyle("gray");
-    front.arc(xc, yc, R, 0, PI2);
-    front.closePath();
-    front.stroke();
+    if (animationEnabled) {
+      front.beginPath();
+      front.setLineWidth(2);
+      front.setStrokeStyle("gray");
+      front.arc(xc, yc, R, 0, PI2);
+      front.closePath();
+      front.stroke();
+    }
   }
 
   /**
@@ -322,20 +322,22 @@ public class SpiroDraw extends PolarEngine {
   private void drawWheel(double theta) {
     double wx = xc + ((R + r) * Math.cos(theta));
     double wy = yc - ((R + r) * Math.sin(theta));
-    if (rUnits>0) {
-      // Draw ring
-      front.beginPath();
-      front.arc(wx, wy, Math.abs(r), 0, PI2);
-      front.closePath();
-      front.stroke();
-      // Draw center
-      front.setLineWidth(1);
-      front.beginPath();
-      front.arc(wx, wy, 3, 0, PI2);
-      front.setFillStyle("black");
-      front.fill();
-      front.closePath();
-      front.stroke();
+    if (animationEnabled) {
+      if (rUnits>0) {
+        // Draw ring
+        front.beginPath();
+        front.arc(wx, wy, Math.abs(r), 0, PI2);
+        front.closePath();
+        front.stroke();
+        // Draw center
+        front.setLineWidth(1);
+        front.beginPath();
+        front.arc(wx, wy, 3, 0, PI2);
+        front.setFillStyle("black");
+        front.fill();
+        front.closePath();
+        front.stroke();
+      }
     }
     drawTip(wx, wy, theta);
   }
@@ -354,15 +356,17 @@ public class SpiroDraw extends PolarEngine {
     // Find tip of line
     double tx = wx + d * Math.cos(rot);
     double ty = wy - d * Math.sin(rot);
-    front.beginPath();
-    front.setFillStyle(penColor);
-    front.arc(tx, ty, penWidth/2+2, 0, PI2);
-    front.fill();
-    front.moveTo(wx, wy);
-    front.setStrokeStyle("black");
-    front.lineTo(tx, ty);
-    front.closePath();
-    front.stroke();
+    if (animationEnabled) {
+      front.beginPath();
+      front.setFillStyle(penColor);
+      front.arc(tx, ty, penWidth/2+2, 0, PI2);
+      front.fill();
+      front.moveTo(wx, wy);
+      front.setStrokeStyle("black");
+      front.lineTo(tx, ty);
+      front.closePath();
+      front.stroke();
+    }
     drawSegmentTo(tx, ty);
   }
 
