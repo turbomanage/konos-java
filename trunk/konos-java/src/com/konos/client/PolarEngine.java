@@ -132,8 +132,8 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
       }
     });
     options.add(new RoseEquation(maxradius, nSlider, dSlider));
-     options.add(new Sinusoid(maxradius, nSlider, dSlider));
-//     options.add(new Lemniscate(maxradius));
+    options.add(new Sinusoid(maxradius, nSlider, dSlider));
+    options.add(new Lemniscate(maxradius));
     eqChooser.setAcceptableValues(options);
     eqChooser.addValueChangeHandler(new ValueChangeHandler<PolarEquation>() {
       @Override
