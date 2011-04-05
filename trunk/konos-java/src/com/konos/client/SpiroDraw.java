@@ -15,6 +15,7 @@ import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
 import com.google.gwt.text.shared.Renderer;
+import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -41,7 +42,7 @@ public class SpiroDraw extends PolarEngine {
   private Label numTurns;
   protected int maxTurns;
   private GWTColorPicker colorPicker;
-  private CssColor penColor = CssColor.make("red");
+  private String penColor = "red";
   private IntegerSlider penWidthSlider;
   private int penWidth;
   private double rad = 0;
@@ -162,7 +163,7 @@ public class SpiroDraw extends PolarEngine {
       @Override
       public void onSelection(SelectionEvent<String> event) {
         String colorString = event.getSelectedItem();
-        penColor = CssColor.make(colorString);
+        penColor = colorString;
         drawFrame(rad);
       }
     });
@@ -192,11 +193,23 @@ public class SpiroDraw extends PolarEngine {
         clear();
       }
     });
+    Button luckyButton = new Button("I'm feeling lucky!");
+    luckyButton.addStyleName("centered");
+    luckyButton.setWidth("100%");
+    luckyButton.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        makeRandom();
+        start();
+      }
+    });
     buttonBar.add(startButton);
     buttonBar.add(stopButton);
     buttonBar.add(clearButton);
     buttonBar.setWidth("100%");
     cp.add(buttonBar);
+    
+    cp.add(luckyButton);
   }
 
   private void addCounter() {
@@ -243,6 +256,7 @@ public class SpiroDraw extends PolarEngine {
    * @return int Optimum step size in radians
    */
   private double calcStepSize() {
+    // TODO smaller window == faster due to step size or drawImage?
     return SPEED / (R + r + d);
   }
 
@@ -300,6 +314,18 @@ public class SpiroDraw extends PolarEngine {
   protected void clear() {
     back.clearRect(0, 0, width, height);
     refresh();
+  }
+
+  /**
+   * Choose random settings for wheel and pen, but
+   * leave fixed radius alone as it often changes
+   * things too much.
+   */
+  private void makeRandom() {
+    wheelRadiusSlider.setValue(Random.nextInt(9));
+    penRadiusSlider.setValue(Random.nextInt(9));
+    penWidthSlider.setValue(1+Random.nextInt(9));
+    colorPicker.setSelected(Random.nextInt(215));
   }
 
   private void drawFixed() {

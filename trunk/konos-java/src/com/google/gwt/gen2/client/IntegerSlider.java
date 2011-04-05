@@ -35,4 +35,7 @@ public class IntegerSlider extends SliderBar {
     this.setPixelSize(184, 40);
   }
 
+  public void setValue(Integer intValue) {
+    super.setValue(intValue.doubleValue());
+  }
 }
