@@ -15,13 +15,14 @@ import com.google.gwt.user.client.ui.Composite;
 
 public class GWTColorPicker extends Composite implements MouseMoveHandler, MouseDownHandler, HasSelectionHandlers<String> {
 
+  public static final String[] hexValues = {"00", "33", "66", "99", "CC", "FF"};
   private static final int COLS = 18;
   // Block height, width, padding
   private static final int BH = 10;
   private static final int BW = 10;
   private static final int BP = 1;
   private Canvas canvas = Canvas.createIfSupported();
-  private CssColor selectedColor = CssColor.make("red");
+  private String selectedColor = "red";
   private int height = 160;
   private int width = 180;
   private Context2d ctx;
@@ -38,7 +39,7 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
     initWidget(canvas);
   }
 
-  public CssColor getSelectedColor() {
+  public String getSelectedColor() {
     return selectedColor;
   }
 
@@ -48,7 +49,7 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
     int y = event.getY() - 40;
     if ((y<0) || (x>=width))
       return;
-    ctx.setFillStyle(getColor(x, y));
+    ctx.setFillStyle(getHexString(getColorIndex(x, y)));
     ctx.fillRect(0, 0, width/2, 30);
   }
 
@@ -58,9 +59,7 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
     int y = event.getY() - 40;
     if ((y<0) || (x>=width))
       return;
-    selectedColor = getColor(x, y);
-    showSelected();
-    fireSelected(selectedColor);
+    setSelected(getColorIndex(x, y));
   }
 
   @Override
@@ -89,18 +88,14 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
     }
   }
 
-  private void fireSelected(CssColor color) {
-      SelectionEvent.fire(this, color.value());
+  private void fireSelected() {
+      SelectionEvent.fire(this, selectedColor);
   }
 
-  private CssColor getColor(int x, int y) {
+  private int getColorIndex(int x, int y) {
     // Get color index 0-215 using row, col
     int i = y / BH * COLS + x / BW;
-    // Convert to RGB using modulus
-    int r = i / 36 * 51;
-    int g = (i % 36) / 6 * 51;
-    int b = i % 6 * 51;
-    return CssColor.make(r, g, b);
+    return i;
   }
 
   private void showSelected() {
@@ -110,4 +105,16 @@ public class GWTColorPicker extends Composite implements MouseMoveHandler, Mouse
     ctx.fillRect(0, 0, width/2, 30);
   }
   
+  public void setSelected(int i) {
+    selectedColor = getHexString(i);
+    showSelected();
+    fireSelected();
+  }
+  
+  public String getHexString(int i) {
+    int r = i / 36;
+    int g = (i % 36) / 6;
+    int b = i % 6;
+    return "#" + hexValues[r] + hexValues[g] + hexValues[b];
+  }
 }
