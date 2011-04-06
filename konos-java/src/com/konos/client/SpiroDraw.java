@@ -36,6 +36,7 @@ public class SpiroDraw extends PolarEngine {
   private IntegerSlider fixedRadiusSlider;
   private IntegerSlider wheelRadiusSlider;
   private IntegerSlider penRadiusSlider;
+  private IntegerSlider penWidthSlider;
   private ValueListBox<WheelLocation> inOrOut;
   private double lastX, lastY;
   private Timer t;
@@ -43,7 +44,6 @@ public class SpiroDraw extends PolarEngine {
   protected int maxTurns;
   private GWTColorPicker colorPicker;
   private String penColor = "red";
-  private IntegerSlider penWidthSlider;
   private int penWidth;
   private double rad = 0;
   private double stepSize;
@@ -93,7 +93,6 @@ public class SpiroDraw extends PolarEngine {
   private void addPenWidthSlider() {
     cp.add(new Label("Pen thickness"));
     penWidthSlider = new IntegerSlider();
-    penWidthSlider.setNumLabels(0);
     penWidthSlider.setValue(3.);
     penWidthSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
       @Override
