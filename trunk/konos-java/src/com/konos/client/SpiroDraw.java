@@ -113,9 +113,9 @@ public class SpiroDraw extends PolarEngine {
       @Override
       public String formatLabel(SliderBar slider, double value) {
         if (value<10.0)
-          return "Smoothest";
+          return "Smoother";
         else
-          return "Fastest";
+          return "Faster";
       }
     });
     speedSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
