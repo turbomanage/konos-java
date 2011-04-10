@@ -13,6 +13,8 @@ import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.gen2.client.IntegerSlider;
+import com.google.gwt.gen2.client.SliderBar;
+import com.google.gwt.gen2.client.SliderBar.LabelFormatter;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
@@ -27,7 +29,6 @@ import com.google.gwt.user.client.ui.Widget;
 public class SpiroDraw extends PolarEngine {
 
   private static final double PI2 = Math.PI * 2;
-  private static final double SPEED = 3.0;
   // Scale factor used to scale wheel radius from 1-10 to pixels
   private VerticalPanel cp;
   private int RUnits, rUnits, dUnits;
@@ -36,6 +37,7 @@ public class SpiroDraw extends PolarEngine {
   private IntegerSlider wheelRadiusSlider;
   private IntegerSlider penRadiusSlider;
   private IntegerSlider penWidthSlider;
+  private SliderBar speedSlider;
   private ValueListBox<WheelLocation> inOrOut;
   private double lastX, lastY;
   private Timer t;
@@ -48,6 +50,7 @@ public class SpiroDraw extends PolarEngine {
   private double stepSize;
   private boolean animationEnabled = true;
   private int numPoints;
+  private double speed;
   
   private enum WheelLocation {
     INSIDE(-1), OUTSIDE(1);
@@ -73,6 +76,7 @@ public class SpiroDraw extends PolarEngine {
     addPenRadiusSlider();
     addColorPicker();
     addPenWidthSlider();
+    addSpeedSlider();
     addButtons();
     addCounter();
   }
@@ -102,6 +106,31 @@ public class SpiroDraw extends PolarEngine {
       }
     });
     cp.add(penWidthSlider);
+  }
+
+  private void addSpeedSlider() {
+    speedSlider = new SliderBar(1., 20., new LabelFormatter() {
+      @Override
+      public String formatLabel(SliderBar slider, double value) {
+        if (value<10.0)
+          return "Smoothest";
+        else
+          return "Fastest";
+      }
+    });
+    speedSlider.addValueChangeHandler(new ValueChangeHandler<Double>() {
+      @Override
+      public void onValueChange(ValueChangeEvent<Double> event) {
+        speed = event.getValue();
+        calcStepSize();
+      }
+    });
+    speedSlider.setNumLabels(1);
+    speedSlider.setNumTicks(1);
+    speedSlider.setStepSize(1.);
+    speedSlider.setPixelSize(184, 40);
+    speedSlider.setValue(15.);
+    cp.add(speedSlider);
   }
 
   private void addPenRadiusSlider() {
@@ -244,7 +273,8 @@ public class SpiroDraw extends PolarEngine {
     d = dUnits * R/RUnits;
     numPoints = calcNumPoints();
     maxTurns = calcTurns();
-    stepSize = calcStepSize();
+    speed = speedSlider.getCurrentValue();
+    calcStepSize();
     numTurns.setText("0" + "/" + maxTurns);
     penWidth = penWidthSlider.getValue().intValue();
     drawFrame(0.);
@@ -271,8 +301,9 @@ public class SpiroDraw extends PolarEngine {
    * 
    * @return int Optimum step size in radians
    */
-  private double calcStepSize() {
-    return SPEED * Math.sqrt(R+r+d) * maxTurns / (numPoints*(d+R+r));
+  private void calcStepSize() {
+//    return SPEED * Math.sqrt(R+r+d) * maxTurns / (numPoints*(d+R+r));
+    stepSize = speed / 100 * maxTurns / numPoints;
   }
 
   public void drawFrame(double theta) {
