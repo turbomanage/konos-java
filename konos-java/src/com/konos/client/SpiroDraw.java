@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.CssColor;
 import com.google.gwt.canvas.dom.client.Context2d.LineCap;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -28,7 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class SpiroDraw extends PolarEngine {
 
   private static final double PI2 = Math.PI * 2;
-  private static final double SPEED = 5;
+  private static final double SPEED = 3.0;
   // Scale factor used to scale wheel radius from 1-10 to pixels
   private VerticalPanel cp;
   private int RUnits, rUnits, dUnits;
@@ -48,6 +47,7 @@ public class SpiroDraw extends PolarEngine {
   private double rad = 0;
   private double stepSize;
   private boolean animationEnabled = true;
+  private int numPoints;
   
   private enum WheelLocation {
     INSIDE(-1), OUTSIDE(1);
@@ -242,11 +242,28 @@ public class SpiroDraw extends PolarEngine {
     r = rUnits * R/RUnits * inOrOut.getValue().getSense();
     dUnits = penRadiusSlider.getValue().intValue();
     d = dUnits * R/RUnits;
+    numPoints = calcNumPoints();
     maxTurns = calcTurns();
     stepSize = calcStepSize();
     numTurns.setText("0" + "/" + maxTurns);
     penWidth = penWidthSlider.getValue().intValue();
     drawFrame(0.);
+  }
+
+  private int calcNumPoints() {
+    if ((dUnits==0) || (rUnits==0))
+      // Empirically, treat it like an oval
+      return 2;
+    int gcf = gcf(RUnits, rUnits);
+    int n = RUnits / gcf;
+    int d = rUnits / gcf;
+    if (n % 2 == 1)
+      // odd
+      return n;
+    else if (d %2 == 1)
+      return n;
+    else
+      return n/2;
   }
 
   /**
@@ -255,8 +272,7 @@ public class SpiroDraw extends PolarEngine {
    * @return int Optimum step size in radians
    */
   private double calcStepSize() {
-    // TODO smaller window == faster due to step size or drawImage?
-    return SPEED / (R + r + d);
+    return SPEED * Math.sqrt(R+r+d) * maxTurns / (numPoints*(d+R+r));
   }
 
   public void drawFrame(double theta) {
