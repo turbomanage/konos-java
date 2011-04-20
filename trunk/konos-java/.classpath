@@ -7,8 +7,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
-	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER/GWT (2)"/>
-	<classpathentry kind="lib" path="/Users/drfibonacci/Downloads/eclipse 3/plugins/com.google.gwt.eclipse.sdkbundle_2.3.0.ms1_r36v201103311806/gwt-2.3.0-m1/validation-api-1.0.0.GA-sources.jar"/>
-	<classpathentry kind="lib" path="/Users/drfibonacci/Downloads/eclipse 3/plugins/com.google.gwt.eclipse.sdkbundle_2.3.0.ms1_r36v201103311806/gwt-2.3.0-m1/validation-api-1.0.0.GA.jar"/>
+	<classpathentry kind="con" path="com.google.gwt.eclipse.core.GWT_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
