@@ -332,7 +332,7 @@ public class SpiroDraw extends PolarEngine {
         }
       }
     };
-    t.scheduleRepeating(1);
+    t.scheduleRepeating(20);
   }
 
   private int calcTurns() {
