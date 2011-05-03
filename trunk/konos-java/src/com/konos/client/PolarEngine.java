@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.ScheduledCommand;
 import com.google.gwt.event.logical.shared.ResizeEvent;
@@ -28,11 +27,7 @@ import com.google.gwt.user.client.ui.Widget;
 public class PolarEngine extends RenderEngine implements RequiresResize {
 
   protected double maxradius = 290.;
-  protected int yc;
-  protected int xc;
   private Timer t;
-  protected Context2d front;
-  protected Context2d back;
   private Label nTurns = new Label();
   private IntegerSlider nSlider = new IntegerSlider();
   private IntegerSlider dSlider = new IntegerSlider();
@@ -42,8 +37,6 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
   private double lastY;
   private ValueListBox<PolarEquation> eqChooser;
   private List<PolarEquation> options = new ArrayList<PolarEquation>();
-  protected Canvas backCanvas;
-
   public interface PolarEquation {
     int numHalfTurns();
 
@@ -179,9 +172,10 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
       @Override
       public void run() {
         if (deg <= nPi * 180) {
-          drawFrame(deg++);
+          drawFrame(deg);
           turns = new Integer(deg / 180);
           nTurns.setText(turns + "/" + nPi);
+          deg+=1;
         } else {
           this.cancel();
           front.clearRect(0, 0, width, height);
@@ -189,7 +183,7 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
         }
       }
     };
-    t.scheduleRepeating(1);
+    t.scheduleRepeating(20);
   }
 
   @Override
@@ -264,18 +258,6 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
 
   public static int getX(double r, double theta) {
     return (int) (r * Math.cos(theta));
-  }
-  
-  @Override
-  public void onResize() {
-    height = Window.getClientHeight();
-    width = Window.getClientWidth() - 200;
-    yc = height/2;
-    xc = width/2;
-    canvas.setCoordinateSpaceHeight(height);
-    canvas.setCoordinateSpaceWidth(width);
-    backCanvas.setCoordinateSpaceHeight(height);
-    backCanvas.setCoordinateSpaceWidth(width);
   }
 
 }

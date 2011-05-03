@@ -8,6 +8,8 @@ import com.google.gwt.canvas.dom.client.Context2d.LineCap;
 import com.google.gwt.canvas.dom.client.Context2d.LineJoin;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.logical.shared.ResizeEvent;
+import com.google.gwt.event.logical.shared.ResizeHandler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -18,6 +20,7 @@ import com.google.gwt.gen2.client.SliderBar.LabelFormatter;
 import com.google.gwt.text.shared.Renderer;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -25,8 +28,9 @@ import com.google.gwt.user.client.ui.TabLayoutPanel;
 import com.google.gwt.user.client.ui.ValueListBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 
-public class SpiroDraw extends PolarEngine {
+public class SpiroDraw extends RenderEngine {
 
   private static final double PI2 = Math.PI * 2;
   // Scale factor used to scale wheel radius from 1-10 to pixels
@@ -63,8 +67,32 @@ public class SpiroDraw extends PolarEngine {
     }
   }
   
-  public SpiroDraw(final Canvas canvas, TabLayoutPanel panel) {
-    super(canvas, panel);
+  public SpiroDraw(final Canvas canvas, final TabLayoutPanel panel) {
+      super(canvas);
+      front = canvas.getContext2d();
+      backCanvas = Canvas.createIfSupported();
+      back = backCanvas.getContext2d();
+      initControlPanel();
+      panel.addSelectionHandler(new SelectionHandler<Integer>() {
+        @Override
+        public void onSelection(SelectionEvent<Integer> event) {
+          int i = event.getSelectedItem();
+          if (panel.getWidget(i)==getControlPanel()) {
+            refresh();
+          } else {
+            stop();
+          }
+        }
+      });
+      Window.addResizeHandler(new ResizeHandler() {
+        @Override
+        public void onResize(ResizeEvent event) {
+          SpiroDraw.this.onResize();
+          refresh();
+        }
+      });
+      onResize();
+
   }
 
   @Override
@@ -200,6 +228,7 @@ public class SpiroDraw extends PolarEngine {
 
   private void addButtons() {
     HorizontalPanel buttonBar = new HorizontalPanel();
+    buttonBar.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_CENTER);
     Button startButton = new Button("Start");
     startButton.addClickHandler(new ClickHandler() {
       @Override
@@ -456,6 +485,11 @@ public class SpiroDraw extends PolarEngine {
     }
     lastX = tx;
     lastY = ty;
+  }
+
+  @Override
+  void drawFrame(int deg) {
+    drawFrame(rad);
   }
 
 }
