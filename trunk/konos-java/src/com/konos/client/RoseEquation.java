@@ -29,14 +29,26 @@ public class RoseEquation implements PolarEquation {
 
   @Override
   public int numHalfTurns() {
-    // Calc # of turns required
-    // int nPi = (n%d>0)? d*(1+(n+d)%2) : 2-(n/d)%2;
     int f = RenderEngine.gcf(n, d);
     if (f > 1) {
       n /= f;
       d /= f;
     }
     return (d > 1) ? d * (1 + (n + d) % 2) : 2 - n % 2;
+  }
+  
+  @Override
+  public int numPoints() {
+      if (d==n)
+        return 1; // circle
+      int gcf = RenderEngine.gcf(n,d);
+      n/=gcf;
+      d/=gcf;
+      if ((n+d) % 2 == 0)
+        // even
+        return n;
+      else
+        return 2*n;
   }
   
   @Override

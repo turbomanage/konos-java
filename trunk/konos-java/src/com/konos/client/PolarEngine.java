@@ -45,6 +45,8 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
     String getLabel();
 
     void init();
+
+    int numPoints();
   }
 
   public PolarEngine(Canvas canvas, final TabLayoutPanel panel) {
@@ -167,7 +169,9 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
     t = new Timer() {
       private Integer turns;
       int nPi = eq.numHalfTurns();
+      int numPoints = eq.numPoints();
       int deg = 0;
+      int stepSize = calcStepSize(nPi, numPoints);
 
       @Override
       public void run() {
@@ -175,7 +179,7 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
           drawFrame(deg);
           turns = new Integer(deg / 180);
           nTurns.setText(turns + "/" + nPi);
-          deg+=1;
+          deg+=stepSize;
         } else {
           this.cancel();
           front.clearRect(0, 0, width, height);
@@ -184,6 +188,10 @@ public class PolarEngine extends RenderEngine implements RequiresResize {
       }
     };
     t.scheduleRepeating(20);
+  }
+
+  private int calcStepSize(int numHalfTurns, int numPoints) {
+      return Math.max(1, 5 - numPoints / numHalfTurns);
   }
 
   @Override
